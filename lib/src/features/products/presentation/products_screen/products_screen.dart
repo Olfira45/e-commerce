@@ -162,6 +162,7 @@ class ProductScreen extends StatelessWidget {
                       final product = doc.data();
 
                       return ProductCard(
+                        productId:  product.id,
                         name: product.name,
                         price: product.price,
                         oldPrice: product.price,
@@ -170,29 +171,11 @@ class ProductScreen extends StatelessWidget {
                         imageUrl: product.productImages.first.url,
                         onTap: () {
                           try {
-                            final user =
-                                ref.read(authRepositoryProvider).currentUser;
-                            if (user == null) {
-                              throw Exception('User not logged in');
-                            }
-                            final userId = user.uid;
-                            ref
-                                .read(wishlistRepositoryProvider)
-                                .addWishlistItem(
-                                  userId: userId,
-                                  productId: product.name,
-                                );
-
                             context.goNamed(
                               AppRoute.productDetail.name,
-                              pathParameters: {'id': product.name},
+                              pathParameters: {'id': product.id},
                             );
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(
-                                      '${product.name} added to wishlist')),
-                            );
+                            print(product.name);
                           } catch (e) {
                             print(e.toString());
                           }

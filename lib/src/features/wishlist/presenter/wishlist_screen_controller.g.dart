@@ -7,7 +7,7 @@ part of 'wishlist_screen_controller.dart';
 // **************************************************************************
 
 String _$wishlistControllerHash() =>
-    r'ec827dc975c6dd059c1a3a93bb2d538168a77f04';
+    r'8176ae9860af3f06c108487a7daeeecd52b54198';
 
 /// See also [WishlistController].
 @ProviderFor(WishlistController)

@@ -37,6 +37,7 @@ class CartScreenController extends _$CartScreenController {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await _cartRepository.removeCartItem(
+        cartItemId,
         userId: userId,
         cartItemId: cartItemId,
       );
@@ -46,5 +47,16 @@ class CartScreenController extends _$CartScreenController {
   /// Fetch the user's cart items as a stream
   Stream<List<CartItem>> watchCart(String userId) {
     return _cartRepository.watchUserCart(userId);
+  }
+
+  Future<void> updateQuantity(
+      String userId, CartItem cartItem, int newQuantity) async {
+    if (newQuantity > 0) {
+      await _cartRepository.updateCartItemQuantity(
+          userId: userId, cartItemId: cartItem.id, newQuantity: newQuantity);
+    } else {
+      await _cartRepository.removeCartItem(cartItem.id,
+          userId: '', cartItemId: '');
+    }
   }
 }

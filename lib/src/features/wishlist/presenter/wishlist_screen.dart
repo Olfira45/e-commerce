@@ -9,7 +9,7 @@ import 'package:pro_ecommerce/src/features/products/data/products_repository.dar
 import 'package:pro_ecommerce/src/features/products/domain/product.dart';
 import 'package:pro_ecommerce/src/features/wishlist/data/wishlist_repository.dart';
 import 'package:pro_ecommerce/src/features/wishlist/presenter/wishlist_screen_controller.dart';
-// Add this line to import the provider
+
 import 'package:pro_ecommerce/src/utils/async_value_ui.dart';
 
 class WishlistScreen extends StatelessWidget {
@@ -27,6 +27,139 @@ class WishlistScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildWishlist(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.listen<AsyncValue>(
+          wishlistControllerProvider,
+          (_, state) => state.showAlertDialogOnError(context),
+        );
+
+        // ✅ Fetch the current user's ID
+        final user = ref.read(authRepositoryProvider).currentUser;
+        if (user == null) {
+          return const Center(
+            child: Text('Please log in to view your wishlist'),
+          );
+        }
+        final userId = user.uid;
+
+        // ✅ Get the wishlist stream (Now using `wishlistStreamProvider`)
+        final wishlistStream = ref.watch(wishlistStreamProvider(userId));
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            debugPrint('Parent constraints: $constraints');
+            return SizedBox(
+              height: constraints.maxHeight > 0 ? constraints.maxHeight : 300,
+              child: wishlistStream.when(
+                data: (wishlistProductIds) {
+                  if (wishlistProductIds.isEmpty) {
+                    return const Center(
+                        child: Text('No items in your wishlist'));
+                  }
+
+                  return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // Number of columns
+                      crossAxisSpacing: 8.0, // Space between columns
+                      mainAxisSpacing: 8.0, // Space between rows
+                      childAspectRatio: 0.75, // Aspect ratio of each item
+                    ),
+                    itemCount: wishlistProductIds.length,
+                    itemBuilder: (context, index) {
+                      final productId = wishlistProductIds[index];
+
+                      // ✅ Fetch product details using a FutureProvider
+                      final productFuture = ref
+                          .watch(productsRepositoryProvider)
+                          .getProduct(productId);
+
+                      return FutureBuilder<Product?>(
+                        future: productFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (!snapshot.hasData || snapshot.data == null) {
+                            return const Center(
+                                child: Text('Product not found'));
+                          }
+
+                          final product = snapshot.data!;
+
+                          return ProductCard(
+                            productId: product.id,
+                            name: product.name,
+                            price: product.price,
+                            oldPrice: product.price,
+                            stock: product.stock,
+                            rating: product.stock.toDouble(),
+                            imageUrl: product.productImages.first.url,
+                            onTap: () async {
+                              try {
+                                final user = ref
+                                    .read(authRepositoryProvider)
+                                    .currentUser;
+                                if (user == null) {
+                                  throw Exception('User not logged in');
+                                }
+                                final userId = user.uid;
+
+                                // ✅ Toggle wishlist item (Add/Remove)
+                                final wishlist = await ref.read(
+                                    wishlistStreamProvider(userId).future);
+                                if (wishlist.contains(product.id)) {
+                                  await ref
+                                      .read(wishlistRepositoryProvider)
+                                      .removeWishlistItem(
+                                        userId: userId,
+                                        productId: product.id,
+                                      );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            '${product.name} removed from wishlist')),
+                                  );
+                                } else {
+                                  await ref
+                                      .read(wishlistRepositoryProvider)
+                                      .addWishlistItem(
+                                        userId: userId,
+                                        productId: product.id,
+                                      );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            '${product.name} added to wishlist')),
+                                  );
+                                }
+                              } catch (e) {
+                                print("❌ Wishlist Error: ${e.toString()}");
+                              }
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text('Error: ${error.toString()}'),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+/*
   Widget _buildWishlist(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
@@ -93,6 +226,7 @@ class WishlistScreen extends StatelessWidget {
                           final product = snapshot.data!;
 
                           return ProductCard(
+                            productId: product.id,
                             name: product.name,
                             price: product.price,
                             oldPrice: product.price,
@@ -140,7 +274,7 @@ class WishlistScreen extends StatelessWidget {
         );
       },
     );
-  }
+  }*/
 }
 
 class WishlistItemCard extends StatelessWidget {

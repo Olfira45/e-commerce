@@ -24,7 +24,7 @@ class OnboardingScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Track your time.\nBecause time counts.',
+                'Shop smart.\nSave big.',
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),

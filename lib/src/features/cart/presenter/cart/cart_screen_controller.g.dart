@@ -7,7 +7,7 @@ part of 'cart_screen_controller.dart';
 // **************************************************************************
 
 String _$cartScreenControllerHash() =>
-    r'b39fdb62c4fd9becb580294a5b37fe445c184b17';
+    r'c0e52b3878c8acdac089eb945762937cdd7d0eed';
 
 /// See also [CartScreenController].
 @ProviderFor(CartScreenController)

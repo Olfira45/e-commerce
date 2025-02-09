@@ -33,7 +33,7 @@ class WishlistController extends _$WishlistController {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await _wishlistRepository.removeWishlistItem(
-          userId: userId, wishlistItemId: wishlistItemId);
+          userId: userId, productId: wishlistItemId);
     });
   }
 

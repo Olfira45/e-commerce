@@ -11,7 +11,7 @@ String _$wishlistRepositoryHash() =>
 
 /// See also [wishlistRepository].
 @ProviderFor(wishlistRepository)
-final wishlistRepositoryProvider = Provider<WishlistRepository>.internal(
+final wishlistRepositoryProviderGenerated = Provider<WishlistRepository>.internal(
   wishlistRepository,
   name: r'wishlistRepositoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
